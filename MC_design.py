@@ -91,7 +91,7 @@ print("-----Other stuff-----")
 df=np.arccos(np.sqrt(g))*c/(2*np.pi*L)
 print("df (MHz)=", df/1e6)
 
-#f=0 #a commenter pour center sur f
+f=0 #a commenter pour center sur f
 
 #Plotting transmission(frequency)
 fsr = c/(2*n*L) # free spectral range
