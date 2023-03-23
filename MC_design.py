@@ -18,37 +18,37 @@ def L00(lbda,q,g):
 c=2.99792e8  # speed of light
 carrier=1064e-9 # Carrier wavelength
 f=c/carrier
+k=2*np.pi*f/c
 fm=[6e6, 56e6] #SB frequencies
 R1 = 0.99; T1=np.sqrt(1-R1) # mirror 1
 R2 = 0.99; T2=np.sqrt(1-R2) # mirror 2
-n=1.1 # index of cavity
-sidebands_trans_min=0.95 # Minimum transmission for the higher fm
-TEM_limit=0.05 # Max transmission allowed for higher order TEM modes
-Ls=[]; T=[]; TEM=[]
-k=2*np.pi*f/c
-nm_max=10
-L_min=40e-3
-F_min=5 # Minimum finesse of the cavity
+n=1.45 # index of cavity
+sidebands_trans_min=0.90 # Minimum transmission for the higher fm
+TEM_limit=0.01 # Max transmission allowed for higher order TEM modes
+Ls=[]; T=[]; TEM=[]; FL_lim=[0,0]; rL_lim=[0,0]
+nm_max=10 # Max n+m order
+L_lim=[5e-2,30e-2] # Optical length limits
+F_lim=[5,50] # Finesse limits
 
 print("-----Parameters intervals-----")
 ## Losses limitations
-losses_max=1/100 #Maximum finesse, from losses limits
-P=10/1000000
-F_max=np.pi*losses_max/(4*P)
-print(round(F_min,4),"<F<",round(F_max,4))
+losses_max=1/100; P=10/1000000
+F_lim[1]=np.pi*losses_max/(4*P)
+if F_lim[1]<F_lim[1]: F_lim[1]=F_lim[1]
+print(round(F_lim[0],4),"<F<",round(F_lim[1],4))
 
 ## Sidebands transmission
-Fl_max=np.sqrt(((1-sidebands_trans_min)*c**2)/(16*sidebands_trans_min*fm[1]**2))
-print(Fl_max)
-Fl_min=L_min*F_min
-L_max=Fl_max/F_min
-print(round(L_min,4),"<L<",round(L_max,4))
+FL_lim[1]=np.sqrt(((1-sidebands_trans_min)*c**2)/(16*sidebands_trans_min*fm[1]**2))
+print("FL_max=", FL_lim[1])
+FL_lim[0]=L_lim[0]*F_lim[0]
+L_lim[1]=FL_lim[1]/F_lim[0]
+print(round(L_lim[0],4),"<L<",round(L_lim[1],4))
 
 ## Filtering of higher modes
-rl_max=TEM_limit*(2*Fl_max/(n*np.pi))**2
-r_min=rl_max/L_max; r_max=rl_max/L_min
+rL_lim[1]=TEM_limit*(2*FL_lim[1]/(n*np.pi))**2
+r_min=rL_lim[1]/L_lim[1]; r_max=rL_lim[1]/L_lim[0]
 g_min=np.cos(1/n)**2 # From the conditions that the max n+m TEM should not go above the FSR
-print(round(g_min,4),"<g<",round(1-L_min/r_max,4))
+print(round(g_min,4),"<g<",round(1-L_lim[0]/r_max,4))
 
 
 F=10
@@ -69,11 +69,11 @@ for i in range(nm_max+1):
 print()
 
 
-# Carrier transmission, find the possibilities between L_min and L_max
-q=np.ceil((2*L_min/carrier)-(1/2)-(np.arccos(np.sqrt(g))/np.pi)) # find minimum value
+# Carrier transmission, find the possibilities between L_lim[0] and L_lim[1]
+q=np.ceil((2*L_lim[0]/carrier)-(1/2)-(np.arccos(np.sqrt(g))/np.pi)) # find minimum value
 qmin=q
 L_poss=L00(carrier,q,g)
-while L_poss<L_max: # loop all the possibilities until L_max
+while L_poss<L_lim[1]: # loop all the possibilities until L_lim[1]
   Ls.append(L_poss)
   q+=1
   L_poss=L00(carrier,q,g)
